@@ -1,3 +1,4 @@
+You're right — here's the **entire thing in one paste**. One file, no breaking. Just copy the whole block below and paste it into your `README.md` on GitHub.
 
 ---
 
