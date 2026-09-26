@@ -82,7 +82,3 @@ For **authorized testing only**. Use it on your own lab or a target you have wri
 
 UI inspired by Cloudflare Turnstile. Logo used for demonstration only — all trademarks belong to Cloudflare, Inc.
 ```
-
----
-
-**That's it — one box, one copy, done.** Paste into your `README.md` on GitHub and edit whatever you want later. 🎯
