@@ -78,14 +78,12 @@ For **authorized testing only**. Use it on your own lab or a target you have wri
 
 ---
 
----
-
 ## Support Wilecurity
 
-Please make sure you star my project as this gives me encouragement 
+Please make sure you star my project and follow me as this gives me encouragement 
 
 
 ## Credits
 
-UI inspired by Cloudflare Turnstile. Logo used for demonstration only — all trademarks belong to Cloudflare, Inc.
+UI inspired by Cloudflare Turnstile. Logo used for demonstration only, all trademarks belong to Cloudflare, Inc.
 
