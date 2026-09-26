@@ -1,4 +1,4 @@
-# ClickFix — Cloudflare Turnstile PoC
+# ClickFix — Cloudflare Turnstile
 
 A fake Cloudflare "Verify you are human" page that detects the visitor's OS, copies the right command to their clipboard, and shows matching steps.
 
@@ -67,7 +67,7 @@ Reload. You'll get the macOS steps.
 ## Notes
 
 - Needs HTTPS for the clipboard to work (`localhost` is fine)
-- No dependencies — plain HTML, CSS, JS
+- No dependencies --- plain HTML, CSS, JS
 - Only runs once per page load
 
 ---
@@ -78,6 +78,14 @@ For **authorized testing only**. Use it on your own lab or a target you have wri
 
 ---
 
+---
+
+## Support Wilecurity
+
+Please make sure you star my project as this gives me encouragement 
+
+
 ## Credits
 
 UI inspired by Cloudflare Turnstile. Logo used for demonstration only — all trademarks belong to Cloudflare, Inc.
+
