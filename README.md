@@ -1,6 +1,3 @@
-Got it! Here's **everything in ONE single code block** — the full README with all the markdown inside a box you can copy at once and edit later.
-
-```markdown
 # ClickFix — Cloudflare Turnstile PoC
 
 A fake Cloudflare "Verify you are human" page that detects the visitor's OS, copies the right command to their clipboard, and shows matching steps.
