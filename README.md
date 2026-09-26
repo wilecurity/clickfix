@@ -52,3 +52,14 @@ const CONFIG = {
   linux:   'YOUR-LINUX-TEST-COMMAND',
   redirectUrl: null
 };
+
+| Option        | Description                               |
+| ------------- | ----------------------------------------- |
+| `domain`      | Domain used by the demonstration          |
+| `windows`     | Command displayed for Windows testing     |
+| `mac`         | Command displayed for macOS testing       |
+| `linux`       | Command displayed for Linux testing       |
+| `redirectUrl` | Optional URL used after the demonstration |
+
+
+ddddd
