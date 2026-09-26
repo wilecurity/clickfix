@@ -81,4 +81,3 @@ For **authorized testing only**. Use it on your own lab or a target you have wri
 ## Credits
 
 UI inspired by Cloudflare Turnstile. Logo used for demonstration only — all trademarks belong to Cloudflare, Inc.
-```
