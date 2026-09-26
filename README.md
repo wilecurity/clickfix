@@ -19,8 +19,8 @@ Built for red team engagements and phishing awareness training.
 
 | File | Use |
 |------|-----|
-| `index.html` | Standalone demo — just open it |
-| `clickfix.js` | Drop-in overlay for an already-compromised page |
+| `index.html` | Standalone demo, just open it |
+| `clickfix.js` | Drop-in overlay for an already compromised page |
 
 ---
 
